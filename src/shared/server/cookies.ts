@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-const REFRESH_MAX_AGE = 60 * 60 * 24 * 30; // 30일
+const REFRESH_MAX_AGE = 60 * 60 * 24 * 30;
 
 export function setAuthCookies(
   response: NextResponse,

@@ -1,7 +1,7 @@
 import axios, { type AxiosRequestConfig, type AxiosResponse } from "axios";
 import { NextRequest, NextResponse } from "next/server";
 import { env } from "./env";
-import { setAuthCookies } from "./cookies";
+import { setAuthCookies, clearAuthCookies } from "./cookies";
 import { exchangeToken, type TokenResult } from "./oauth";
 
 export const serverApi = axios.create({
@@ -13,6 +13,7 @@ export function createAuthApi(req: NextRequest) {
   const accessToken = req.cookies.get("dauth_access_token")?.value;
   const refreshToken = req.cookies.get("dauth_refresh_token")?.value;
   let refreshedTokens: TokenResult | null = null;
+  let refreshFailed = false;
 
   async function request<T = unknown>(config: AxiosRequestConfig): Promise<AxiosResponse<T>> {
     const withAuth = (token?: string): AxiosRequestConfig => ({
@@ -22,9 +23,10 @@ export function createAuthApi(req: NextRequest) {
         ...config.headers,
         ...(token && { Authorization: `Bearer ${token}` }),
       },
+      validateStatus: () => true,
     });
 
-    const res = await axios.request<T>({ ...withAuth(accessToken), validateStatus: () => true });
+    const res = await axios.request<T>(withAuth(accessToken));
 
     if (res.status === 401 && refreshToken) {
       const result = await exchangeToken({
@@ -34,18 +36,19 @@ export function createAuthApi(req: NextRequest) {
 
       if (result.ok) {
         refreshedTokens = result.data;
-        return axios.request<T>({
-          ...withAuth(result.data.access_token),
-          validateStatus: () => true,
-        });
+        return axios.request<T>(withAuth(result.data.access_token));
       }
+
+      refreshFailed = true;
     }
 
     return res;
   }
 
   function applyTokens(response: NextResponse) {
-    if (refreshedTokens) {
+    if (refreshFailed) {
+      clearAuthCookies(response);
+    } else if (refreshedTokens) {
       setAuthCookies(response, refreshedTokens);
     }
   }
