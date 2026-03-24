@@ -2,19 +2,18 @@ import { NextRequest, NextResponse } from "next/server";
 import { env } from "@/shared/server/env";
 
 export async function POST(request: NextRequest) {
-  const body = await request.json();
+  const cookie = request.headers.get("cookie") || "";
 
-  const res = await fetch(`${env.API_URL}/auth/login`, {
+  const res = await fetch(`${env.API_URL}/auth/refresh`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
+    headers: { Cookie: cookie },
   });
 
   const data = await res.json();
   const response = NextResponse.json(data, { status: res.status });
 
-  res.headers.getSetCookie().forEach((cookie) => {
-    response.headers.append("Set-Cookie", cookie);
+  res.headers.getSetCookie().forEach((c) => {
+    response.headers.append("Set-Cookie", c);
   });
 
   return response;

@@ -22,6 +22,3 @@ export async function submitConsent(body: {
   return data.data.redirectUri;
 }
 
-export async function refreshToken(): Promise<void> {
-  await axios.post("/api/auth/token");
-}

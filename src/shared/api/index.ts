@@ -25,11 +25,10 @@ api.interceptors.response.use(
     isRefreshing = true;
 
     try {
-      await axios.post("/api/auth/token");
+      await axios.post("/auth/refresh");
       pendingRequests.forEach((cb) => cb());
       return api(original);
     } catch {
-      await axios.post("/api/auth/logout").catch(() => {});
       pendingRequests.forEach((cb) => cb());
       return Promise.reject(error);
     } finally {

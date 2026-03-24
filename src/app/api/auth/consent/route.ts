@@ -1,18 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
-import { serverApi } from "@/shared/server/api";
+import { env } from "@/shared/server/env";
 
 export async function POST(request: NextRequest) {
-  const dodamToken = request.cookies.get("dauth_dodam_token")?.value;
-
-  if (!dodamToken) {
-    return NextResponse.json({ error: "dodam_token_expired" }, { status: 401 });
-  }
-
+  const cookie = request.headers.get("cookie") || "";
   const body = await request.json();
 
-  const res = await serverApi.post("/oauth/authorize/consent", body, {
-    headers: { Authorization: `Bearer ${dodamToken}` },
+  const res = await fetch(`${env.API_URL}/oauth/authorize/consent`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Cookie: cookie,
+    },
+    body: JSON.stringify(body),
   });
 
-  return NextResponse.json(res.data, { status: res.status });
+  const data = await res.json();
+  return NextResponse.json(data, { status: res.status });
 }

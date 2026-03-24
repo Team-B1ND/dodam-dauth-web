@@ -1,11 +1,8 @@
 "use client";
 
-import { Suspense, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { Suspense } from "react";
 import { colors, FilledButton, TextButton, Avatar, BarChart, Gear, useOverlay } from "@b1nd/dodam-design-system";
-import { useAuth } from "@/features/auth/hooks/useAuth";
-import { useMyProfile } from "@/features/user/hooks/useMyProfile";
-import { useMyApps } from "@/features/client/hooks/useMyApps";
+import { useProfilePage } from "@/features/client/hooks/useProfilePage";
 import { RegisterServiceModal } from "@/features/client/ui/RegisterServiceModal";
 import { EditInfoModal } from "@/features/client/ui/EditInfoModal";
 import { EditUrlModal } from "@/features/client/ui/EditUrlModal";
@@ -14,28 +11,13 @@ import { TransferOwnerModal } from "@/features/client/ui/TransferOwnerModal";
 import { ClientIdModal } from "@/features/client/ui/ClientIdModal";
 import { DeleteServiceModal } from "@/features/client/ui/DeleteServiceModal";
 import { AppHeader } from "@/shared/ui/Header";
-import type { ClientInfo } from "@/entities/client/types";
 import * as S from "./profile.styles";
 
 function ProfileContent() {
-  const searchParams = useSearchParams();
-  const appParam = searchParams.get("app");
-  const { data: loggedIn, isLoading: authLoading } = useAuth();
-  const { data: profile } = useMyProfile(!!loggedIn);
-  const { data: myApps = [] } = useMyApps(!!loggedIn);
-  const [selectedApp, setSelectedApp] = useState<ClientInfo | null>(null);
+  const { loggedIn, authLoading, profile, myApps, activeApp, setSelectedApp, joinDate } = useProfilePage();
   const overlay = useOverlay();
 
   if (authLoading || loggedIn === false) return null;
-
-  const activeApp = selectedApp
-    ?? (appParam ? myApps.find((a) => a.clientId === appParam) : null)
-    ?? myApps[0]
-    ?? null;
-
-  const joinDate = profile?.createdAt
-    ? new Date(profile.createdAt).toLocaleDateString("ko-KR", { year: "numeric", month: "2-digit", day: "2-digit" }).replace(/\. /g, ".").replace(/\.$/, ".")
-    : "-";
 
   return (
     <S.Page>

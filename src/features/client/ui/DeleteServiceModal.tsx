@@ -31,8 +31,6 @@ export function DeleteServiceModal({ app, onDeleted, ...overlayProps }: Props) {
     setLoading(true);
     try {
       await deactivateClient(app.clientId, secret.trim());
-      const ids: string[] = JSON.parse(localStorage.getItem("dauth_client_ids") || "[]");
-      localStorage.setItem("dauth_client_ids", JSON.stringify(ids.filter((id) => id !== app.clientId)));
       queryClient.invalidateQueries({ queryKey: ["client", "myApps"] });
       toast.success("서비스가 삭제되었어요.", { position: "top" });
       onDeleted();

@@ -86,7 +86,7 @@ export function useAuthorizeFlow() {
         const data: AuthorizeData = res.data.data;
         setAuthData(data);
 
-        if ((data.trusted || data.consented) && !autoConsentDone.current) {
+        if (data.consented && !autoConsentDone.current) {
           autoConsentDone.current = true;
           await handleConsent(true, data);
           return;

@@ -40,7 +40,7 @@ export default function HomePage() {
                 <BarChart size={22} />
                 <S.SectionTitle>내가 등록한 서비스</S.SectionTitle>
               </S.SectionLeft>
-              <TextButton size="small" onClick={() => overlay.open((props) => <RegisterServiceModal {...props} />)} buttonCustomStyle={{}}>
+              <TextButton size="small" onClick={() => overlay.open((props) => <RegisterServiceModal {...props} />)} >
                 + 새 앱
               </TextButton>
             </S.SectionHeader>
@@ -59,7 +59,7 @@ export default function HomePage() {
             ) : (
               <S.Empty>
                 <S.EmptyText>아직 등록한 앱이 없어요</S.EmptyText>
-                <FilledButton role="primary" size="medium" display="inline" onClick={() => overlay.open((props) => <RegisterServiceModal {...props} />)} buttonCustomStyle={{}}>
+                <FilledButton role="primary" size="medium" display="inline" onClick={() => overlay.open((props) => <RegisterServiceModal {...props} />)} >
                   첫 앱 등록하기
                 </FilledButton>
               </S.Empty>

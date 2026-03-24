@@ -69,11 +69,6 @@ export function RegisterServiceModal(props: OverlayControllerProps) {
         description: description.trim() || undefined,
         logoUrl: logoUrl.trim() || undefined,
       });
-      const ids: string[] = JSON.parse(localStorage.getItem("dauth_client_ids") || "[]");
-      if (!ids.includes(data.clientId)) {
-        ids.push(data.clientId);
-        localStorage.setItem("dauth_client_ids", JSON.stringify(ids));
-      }
       queryClient.invalidateQueries({ queryKey: ["client", "myApps"] });
       setResult(data);
       setStep("result");

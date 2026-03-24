@@ -1,29 +1,33 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createAuthApi } from "@/shared/server/api";
+import { env } from "@/shared/server/env";
 
 async function proxyRequest(req: NextRequest, { params }: { params: Promise<{ path: string[] }> }) {
   const { path } = await params;
-  const url = "/" + path.join("/") + req.nextUrl.search;
+  const url = `${env.API_URL}/${path.join("/")}${req.nextUrl.search}`;
 
   const hasBody = !["GET", "HEAD"].includes(req.method);
-  const contentType = req.headers.get("content-type") || undefined;
+  const cookie = req.headers.get("cookie") || "";
+  const contentType = req.headers.get("content-type");
 
-  const { request, applyTokens } = createAuthApi(req);
-
-  const res = await request<string>({
-    url,
+  const res = await fetch(url, {
     method: req.method,
-    data: hasBody ? await req.text() : undefined,
-    headers: { ...(contentType && { "Content-Type": contentType }) },
-    transformResponse: [(data) => data],
+    headers: {
+      ...(cookie && { Cookie: cookie }),
+      ...(contentType && { "Content-Type": contentType }),
+    },
+    body: hasBody ? await req.text() : undefined,
   });
 
-  const response = new NextResponse(res.data, {
+  const data = await res.text();
+  const response = new NextResponse(data, {
     status: res.status,
-    headers: { "Content-Type": res.headers["content-type"] || "application/json" },
+    headers: { "Content-Type": res.headers.get("content-type") || "application/json" },
   });
 
-  applyTokens(response);
+  res.headers.getSetCookie().forEach((c) => {
+    response.headers.append("Set-Cookie", c);
+  });
+
   return response;
 }
 

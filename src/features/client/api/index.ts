@@ -6,6 +6,11 @@ export async function getClient(clientId: string): Promise<ClientInfo> {
   return data.data;
 }
 
+export async function getMyClients(): Promise<ClientInfo[]> {
+  const { data } = await api.get("/oauth/clients/me");
+  return data.data;
+}
+
 export async function registerClient(body: {
   clientName: string;
   redirectUris: string[];

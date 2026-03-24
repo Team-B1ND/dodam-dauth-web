@@ -23,7 +23,7 @@ export function ScopeSelector({ selected, onChange }: ScopeSelectorProps) {
     <Grid>
       {scopes.map((scope) => (
         <Item key={scope.scopeKey} onClick={() => toggle(scope.scopeKey)}>
-          <Checkbox size="small" selected={selected.has(scope.scopeKey)} onClick={() => {}} />
+          <Checkbox size="small" selected={selected.has(scope.scopeKey)} />
           <Label>{scope.description}</Label>
         </Item>
       ))}

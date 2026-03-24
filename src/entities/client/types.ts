@@ -11,7 +11,6 @@ export interface AuthorizeData {
   state: string;
   codeChallenge: string;
   codeChallengeMethod: string;
-  trusted: boolean;
   consented: boolean;
 }
 

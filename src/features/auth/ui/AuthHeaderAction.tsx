@@ -23,7 +23,7 @@ export function AuthHeaderAction() {
   }
 
   return (
-    <FilledButton role="primary" size="small" display="inline" onClick={() => router.push("/login")} buttonCustomStyle={{}}>
+    <FilledButton role="primary" size="small" display="inline" onClick={() => router.push("/login")}>
       로그인
     </FilledButton>
   );
