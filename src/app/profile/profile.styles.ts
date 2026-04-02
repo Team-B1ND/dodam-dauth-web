@@ -17,6 +17,7 @@ export const Main = styled.main`
   max-width: ${breakpoints.largeDesktop}px;
   width: 100%;
   margin: 0 auto;
+  overflow-y: scroll;
   ${mq.mobileOnly} { padding: 16px 20px; }
 `;
 

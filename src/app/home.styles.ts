@@ -17,6 +17,7 @@ export const Main = styled.main`
   width: 100%;
   margin: 0 auto;
   padding: 40px 40px 80px;
+  overflow-y: scroll;
   ${mq.mobileOnly} { padding: 24px 20px 60px; gap: 32px; }
 `;
 
