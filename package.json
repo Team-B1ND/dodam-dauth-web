@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev --experimental-https --experimental-https-key dauth.dodam-dev.b1nd.com-key.pem --experimental-https-cert dauth.dodam-dev.b1nd.com.pem --hostname dauth.dodam-dev.b1nd.com",
     "build": "next build",
     "start": "next start",
     "lint": "eslint"

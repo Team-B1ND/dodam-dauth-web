@@ -16,14 +16,25 @@ export function AuthHeaderAction() {
   if (loggedIn) {
     return (
       <ProfileButton onClick={() => router.push("/profile")}>
-        {profile?.profileImage ? <ProfileImg src={profile.profileImage} /> : <Avatar size={32} />}
+        {profile?.profileImage ? (
+          <ProfileImg src={profile.profileImage} />
+        ) : (
+          <Avatar size={32} />
+        )}
         {profile && <Name>{profile.name}</Name>}
       </ProfileButton>
     );
   }
 
   return (
-    <FilledButton role="primary" size="small" display="inline" onClick={() => router.push("/login")}>
+    <FilledButton
+      role="primary"
+      size="small"
+      display="inline"
+      onClick={() =>
+        (window.location.href =
+          "https://dodam.b1nd.com/login?redirectUrl=https://dauth.b1nd.com")
+      }>
       로그인
     </FilledButton>
   );
@@ -38,7 +49,9 @@ const ProfileButton = styled.button`
   border-radius: 12px;
   cursor: pointer;
   transition: background 0.15s;
-  &:hover { background: ${colors.fill.hover}; }
+  &:hover {
+    background: ${colors.fill.hover};
+  }
 `;
 
 const ProfileImg = styled.img`
