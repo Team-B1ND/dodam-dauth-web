@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import axios from "axios";
-import { publicApi } from "@/shared/api";
+import { apiClient } from "@/shared/api";
 import { checkLoginStatus, submitConsent } from "@/features/auth/api";
 import type { AuthorizeData } from "@/entities/client/types";
 
@@ -72,7 +72,7 @@ export function useAuthorizeFlow() {
       }
 
       try {
-        const res = await publicApi.get("/oauth/authorize", {
+        const res = await apiClient.get<AuthorizeData>("/oauth/authorize", {
           params: {
             response_type: "code",
             client_id: clientId,
@@ -83,7 +83,7 @@ export function useAuthorizeFlow() {
             code_challenge_method: codeChallengeMethod,
           },
         });
-        const data: AuthorizeData = res.data.data;
+        const data: AuthorizeData = res.data;
         setAuthData(data);
 
         if (data.consented && !autoConsentDone.current) {

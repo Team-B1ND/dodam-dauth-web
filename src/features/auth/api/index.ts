@@ -1,14 +1,16 @@
-import axios from "axios";
+import { apiClient } from "@/shared/api";
 
 export async function checkLoginStatus(): Promise<boolean> {
-  const { data } = await axios.get("/api/auth/check", {
-    withCredentials: true,
-  });
-  return data.loggedIn;
+  try {
+    await apiClient.get("/user/me");
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 export async function login(username: string, password: string): Promise<void> {
-  await axios.post("/api/auth/login", { username, password });
+  await apiClient.post("/auth/login", { username, password });
 }
 
 export async function submitConsent(body: {
@@ -20,6 +22,6 @@ export async function submitConsent(body: {
   codeChallengeMethod: string;
   approved: boolean;
 }): Promise<string> {
-  const { data } = await axios.post("/api/auth/consent", body);
+  const data = await apiClient.post<{ redirectUri: string }>("/oauth/authorize/consent", body);
   return data.data.redirectUri;
 }

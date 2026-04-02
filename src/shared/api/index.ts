@@ -1,43 +1,9 @@
-import axios from "axios";
+import { createApiClient } from "@b1nd/api-client";
 
-export const api = axios.create({ baseURL: "/api/proxy" });
-
-let isRefreshing = false;
-let pendingRequests: (() => void)[] = [];
-
-api.interceptors.response.use(
-  (res) => res,
-  async (error) => {
-    const original = error.config;
-
-    if (error.response?.status !== 401 || original._retried) {
-      return Promise.reject(error);
+export const apiClient = createApiClient(process.env.NEXT_PUBLIC_API_URL!, {
+  onRefreshFailed: () => {
+    if (typeof window !== "undefined") {
+      window.location.href = "https://dodam.b1nd.com/login?redirectUrl=https://dauth.b1nd.com";
     }
-
-    original._retried = true;
-
-    if (isRefreshing) {
-      return new Promise((resolve, reject) => {
-        pendingRequests.push(() => api(original).then(resolve, reject));
-      });
-    }
-
-    isRefreshing = true;
-
-    try {
-      await axios.post("/auth/refresh");
-      pendingRequests.forEach((cb) => cb());
-      return api(original);
-    } catch {
-      pendingRequests.forEach((cb) => cb());
-      return Promise.reject(error);
-    } finally {
-      isRefreshing = false;
-      pendingRequests = [];
-    }
-  }
-);
-
-export const publicApi = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080",
+  },
 });

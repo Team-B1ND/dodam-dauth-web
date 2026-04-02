@@ -9,6 +9,7 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@b1nd/api-client": "^1.0.2",
     "@b1nd/dodam-design-system": "^1.0.6",
     "@emotion/cache": "^11.14.0",
     "@emotion/react": "^11.14.0",
