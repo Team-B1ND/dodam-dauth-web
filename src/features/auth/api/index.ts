@@ -1,7 +1,9 @@
 import axios from "axios";
 
 export async function checkLoginStatus(): Promise<boolean> {
-  const { data } = await axios.get("/api/auth/check");
+  const { data } = await axios.get("/api/auth/check", {
+    withCredentials: true,
+  });
   return data.loggedIn;
 }
 
@@ -21,4 +23,3 @@ export async function submitConsent(body: {
   const { data } = await axios.post("/api/auth/consent", body);
   return data.data.redirectUri;
 }
-
