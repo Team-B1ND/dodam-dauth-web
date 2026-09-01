@@ -2,10 +2,10 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import axios from "axios";
 import { apiClient } from "@/shared/api";
 import { checkLoginStatus, submitConsent } from "@/features/auth/api";
 import type { AuthorizeData } from "@/entities/client/types";
+import { getAuthorizeReturnUrl, getErrorMessage, isUnauthorized } from "@/features/auth/utils/authorize-flow";
 
 export function useAuthorizeFlow() {
   const router = useRouter();
@@ -25,13 +25,14 @@ export function useAuthorizeFlow() {
   const [submitting, setSubmitting] = useState(false);
 
   const redirectToLogin = useCallback(() => {
-    sessionStorage.setItem("dauth_authorize_return", window.location.pathname + window.location.search);
+    sessionStorage.setItem("dauth_authorize_return", getAuthorizeReturnUrl(window.location.pathname, window.location.search));
     router.replace("/login?next=__authorize__");
   }, [router]);
 
   const handleConsent = useCallback(
     async (approved: boolean, data: AuthorizeData) => {
       setSubmitting(true);
+      setError("");
       try {
         const redirectUrl = await submitConsent({
           clientId: data.clientId,
@@ -44,60 +45,71 @@ export function useAuthorizeFlow() {
         });
         window.location.href = redirectUrl;
       } catch (err: unknown) {
-        if (axios.isAxiosError(err) && err.response?.status === 401) {
+        if (isUnauthorized(err)) {
           redirectToLogin();
           return;
         }
-        setError(axios.isAxiosError(err) && err.response?.data?.message ? err.response.data.message : "서버에 연결할 수 없습니다.");
+        setError(getErrorMessage(err));
+      } finally {
         setSubmitting(false);
       }
     },
     [scope, redirectToLogin]
   );
 
-  useEffect(() => {
-    (async () => {
-      try {
-        const loggedIn = await checkLoginStatus();
-        if (!loggedIn) { redirectToLogin(); return; }
-      } catch {
+  const loadAuthorize = useCallback(async () => {
+    setLoading(true);
+    setError("");
+    setAuthData(null);
+
+    try {
+      const loggedIn = await checkLoginStatus();
+      if (!loggedIn) {
         redirectToLogin();
         return;
       }
 
       if (!clientId || !redirectUri || !scope || !state || !codeChallenge) {
         setError("필수 파라미터가 누락되었습니다.");
-        setLoading(false);
         return;
       }
 
-      try {
-        const res = await apiClient.get<AuthorizeData>("/oauth/authorize", {
-          params: {
-            response_type: "code",
-            client_id: clientId,
-            redirect_uri: redirectUri,
-            scope,
-            state,
-            code_challenge: codeChallenge,
-            code_challenge_method: codeChallengeMethod,
-          },
-        });
-        const data: AuthorizeData = res.data;
-        setAuthData(data);
+      const res = await apiClient.get<AuthorizeData>("/oauth/authorize", {
+        params: {
+          response_type: "code",
+          client_id: clientId,
+          redirect_uri: redirectUri,
+          scope,
+          state,
+          code_challenge: codeChallenge,
+          code_challenge_method: codeChallengeMethod,
+        },
+      });
+      const data: AuthorizeData = res.data;
+      setAuthData(data);
 
-        if (data.consented && !autoConsentDone.current) {
-          autoConsentDone.current = true;
-          await handleConsent(true, data);
-          return;
-        }
-      } catch (err: unknown) {
-        setError(axios.isAxiosError(err) && err.response?.data?.message ? err.response.data.message : "서버에 연결할 수 없습니다.");
-      } finally {
-        setLoading(false);
+      if (data.consented && !autoConsentDone.current) {
+        autoConsentDone.current = true;
+        await handleConsent(true, data);
       }
-    })();
+    } catch (err: unknown) {
+      if (isUnauthorized(err)) {
+        redirectToLogin();
+        return;
+      }
+      setError(getErrorMessage(err));
+    } finally {
+      setLoading(false);
+    }
   }, [clientId, redirectUri, scope, state, codeChallenge, codeChallengeMethod, handleConsent, redirectToLogin]);
 
-  return { authData, error, loading, submitting, handleConsent };
+  useEffect(() => {
+    void loadAuthorize();
+  }, [loadAuthorize]);
+
+  const retryAuthorize = useCallback(() => {
+    void loadAuthorize();
+  }, [loadAuthorize]);
+
+  return { authData, error, loading, submitting, handleConsent, retryAuthorize, redirectToLogin };
 }

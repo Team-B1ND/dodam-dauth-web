@@ -6,7 +6,7 @@ import { useAuthorizeFlow } from "@/features/auth/hooks/useAuthorizeFlow";
 import * as S from "./authorize.styles";
 
 function AuthorizeContent() {
-  const { authData, error, loading, submitting, handleConsent } = useAuthorizeFlow();
+  const { authData, error, loading, submitting, handleConsent, retryAuthorize, redirectToLogin } = useAuthorizeFlow();
 
   if (loading || submitting) {
     return <S.CenterPage><S.StatusText>로딩 중...</S.StatusText></S.CenterPage>;
@@ -15,7 +15,17 @@ function AuthorizeContent() {
   if (error) {
     return (
       <S.CenterPage>
-        <S.Card><S.ErrorText>{error}</S.ErrorText></S.Card>
+        <S.Card>
+          <S.ErrorText>{error}</S.ErrorText>
+          <S.ButtonGroup>
+            <FilledButton role="assistive" size="medium" display="fill" onClick={retryAuthorize} buttonCustomStyle={{ height: "44px", flex: 1 }}>
+              다시 시도
+            </FilledButton>
+            <FilledButton role="primary" size="medium" display="fill" onClick={redirectToLogin} buttonCustomStyle={{ height: "44px", flex: 1 }}>
+              로그인
+            </FilledButton>
+          </S.ButtonGroup>
+        </S.Card>
       </S.CenterPage>
     );
   }
