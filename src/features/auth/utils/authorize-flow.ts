@@ -10,15 +10,17 @@ export function isUnauthorized(error: unknown) {
 }
 
 export function getErrorMessage(error: unknown) {
-  if (isRecord(error) && (error.code === "ECONNABORTED" || error.code === "ETIMEDOUT")) {
+  if (!isRecord(error)) return "서버에 연결할 수 없습니다. 다시 시도해주세요.";
+
+  if (error.code === "ECONNABORTED" || error.code === "ETIMEDOUT") {
     return "요청 시간이 초과되었습니다. 다시 시도해주세요.";
   }
 
-  const response = isRecord(error) && isRecord(error.response) ? error.response : undefined;
+  const response = isRecord(error.response) ? error.response : undefined;
   const responseData = response && isRecord(response.data) ? response.data : undefined;
 
   if (typeof responseData?.message === "string") return responseData.message;
-  if (isRecord(error) && typeof error.message === "string") return error.message;
+  if (typeof error.message === "string") return error.message;
 
   return "서버에 연결할 수 없습니다. 다시 시도해주세요.";
 }
