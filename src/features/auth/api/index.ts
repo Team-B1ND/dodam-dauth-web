@@ -1,11 +1,13 @@
 import { apiClient } from "@/shared/api";
+import { isUnauthorized } from "@/features/auth/utils/authorize-flow";
 
 export async function checkLoginStatus(): Promise<boolean> {
   try {
     await apiClient.get("/user/me");
     return true;
-  } catch {
-    return false;
+  } catch (error) {
+    if (isUnauthorized(error)) return false;
+    throw error;
   }
 }
 
