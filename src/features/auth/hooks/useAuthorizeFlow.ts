@@ -5,12 +5,19 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { apiClient } from "@/shared/api";
 import { checkLoginStatus, submitConsent } from "@/features/auth/api";
 import type { AuthorizeData } from "@/entities/client/types";
-import { getAuthorizeReturnUrl, getErrorMessage, isUnauthorized } from "@/features/auth/utils/authorize-flow";
+import {
+  getAuthorizeReturnUrl,
+  getErrorMessage,
+  hasAttemptedAutoConsent,
+  isUnauthorized,
+  markAutoConsentAttempted,
+} from "@/features/auth/utils/authorize-flow";
 
 export function useAuthorizeFlow() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const autoConsentDone = useRef(false);
+  const submitLock = useRef(false);
+  const redirectLock = useRef(false);
 
   const clientId = searchParams.get("client_id");
   const redirectUri = searchParams.get("redirect_uri");
@@ -23,6 +30,7 @@ export function useAuthorizeFlow() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [redirecting, setRedirecting] = useState(false);
 
   const redirectToLogin = useCallback(() => {
     sessionStorage.setItem("dauth_authorize_return", getAuthorizeReturnUrl(window.location.pathname, window.location.search));
@@ -31,8 +39,14 @@ export function useAuthorizeFlow() {
 
   const handleConsent = useCallback(
     async (approved: boolean, data: AuthorizeData) => {
+      // The lock is a ref, not `submitting`: a state update is invisible to
+      // clicks already queued in the same task (double click, touch + click,
+      // Enter on a focused button), and one consent must issue one code.
+      if (submitLock.current) return;
+      submitLock.current = true;
       setSubmitting(true);
       setError("");
+
       try {
         const redirectUrl = await submitConsent({
           clientId: data.clientId,
@@ -43,21 +57,32 @@ export function useAuthorizeFlow() {
           codeChallengeMethod: data.codeChallengeMethod,
           approved,
         });
-        window.location.href = redirectUrl;
+
+        if (redirectLock.current) return;
+        redirectLock.current = true;
+        setRedirecting(true);
+        // replace() keeps back navigation out of a consent screen that is done,
+        // and a second assignment would cancel the callback already in flight.
+        window.location.replace(redirectUrl);
+        // Both locks stay closed on success. Navigation is asynchronous, so
+        // unlocking here would re-enable consent while the callback is running.
       } catch (err: unknown) {
+        submitLock.current = false;
+        setSubmitting(false);
+
         if (isUnauthorized(err)) {
           redirectToLogin();
           return;
         }
         setError(getErrorMessage(err));
-      } finally {
-        setSubmitting(false);
       }
     },
     [scope, redirectToLogin]
   );
 
   const loadAuthorize = useCallback(async () => {
+    if (redirectLock.current) return;
+
     setLoading(true);
     setError("");
     setAuthData(null);
@@ -88,8 +113,10 @@ export function useAuthorizeFlow() {
       const data: AuthorizeData = res.data;
       setAuthData(data);
 
-      if (data.consented && !autoConsentDone.current) {
-        autoConsentDone.current = true;
+      // Marked before the request and never cleared, so a remount, a retry or a
+      // back navigation cannot auto-issue a second code for the same state.
+      if (data.consented && !hasAttemptedAutoConsent(state)) {
+        markAutoConsentAttempted(state);
         await handleConsent(true, data);
       }
     } catch (err: unknown) {
@@ -111,5 +138,5 @@ export function useAuthorizeFlow() {
     void loadAuthorize();
   }, [loadAuthorize]);
 
-  return { authData, error, loading, submitting, handleConsent, retryAuthorize, redirectToLogin };
+  return { authData, error, loading, submitting, redirecting, handleConsent, retryAuthorize, redirectToLogin };
 }

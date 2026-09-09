@@ -1,6 +1,12 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { getAuthorizeReturnUrl, getErrorMessage, isUnauthorized } from "../src/features/auth/utils/authorize-flow.ts";
+import {
+  getAuthorizeReturnUrl,
+  getErrorMessage,
+  hasAttemptedAutoConsent,
+  isUnauthorized,
+  markAutoConsentAttempted,
+} from "../src/features/auth/utils/authorize-flow.ts";
 
 test("preserves the authorize path and query when returning from login", () => {
   assert.equal(
@@ -18,4 +24,13 @@ test("recognizes Axios and API-client unauthorized errors", () => {
 test("returns actionable timeout and server messages", () => {
   assert.equal(getErrorMessage({ code: "ECONNABORTED" }), "요청 시간이 초과되었습니다. 다시 시도해주세요.");
   assert.equal(getErrorMessage({ response: { data: { message: "잠시 후 다시 시도해주세요." } } }), "잠시 후 다시 시도해주세요.");
+});
+
+test("marks auto consent per state so a remount cannot issue a second code", () => {
+  assert.equal(hasAttemptedAutoConsent("state-a"), false);
+
+  markAutoConsentAttempted("state-a");
+
+  assert.equal(hasAttemptedAutoConsent("state-a"), true);
+  assert.equal(hasAttemptedAutoConsent("state-b"), false);
 });

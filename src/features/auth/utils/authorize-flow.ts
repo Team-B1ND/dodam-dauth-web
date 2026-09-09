@@ -28,3 +28,26 @@ export function getErrorMessage(error: unknown) {
 export function getAuthorizeReturnUrl(pathname: string, search: string) {
   return pathname + search;
 }
+
+const AUTO_CONSENT_STORAGE_PREFIX = "dauth_auto_consent:";
+const attemptedAutoConsents = new Set<string>();
+
+export function hasAttemptedAutoConsent(state: string) {
+  if (attemptedAutoConsents.has(state)) return true;
+
+  try {
+    return sessionStorage.getItem(AUTO_CONSENT_STORAGE_PREFIX + state) !== null;
+  } catch {
+    return false;
+  }
+}
+
+export function markAutoConsentAttempted(state: string) {
+  attemptedAutoConsents.add(state);
+
+  try {
+    sessionStorage.setItem(AUTO_CONSENT_STORAGE_PREFIX + state, "1");
+  } catch {
+    // Storage can be blocked; the module-scoped set still covers remounts.
+  }
+}
