@@ -3,6 +3,7 @@ import test from "node:test";
 import {
   getAuthorizeReturnUrl,
   getErrorMessage,
+  getAutoConsentKey,
   hasAttemptedAutoConsent,
   isUnauthorized,
   markAutoConsentAttempted,
@@ -26,11 +27,36 @@ test("returns actionable timeout and server messages", () => {
   assert.equal(getErrorMessage({ response: { data: { message: "잠시 후 다시 시도해주세요." } } }), "잠시 후 다시 시도해주세요.");
 });
 
-test("marks auto consent per state so a remount cannot issue a second code", () => {
-  assert.equal(hasAttemptedAutoConsent("state-a"), false);
+const transaction = {
+  clientId: "client-a",
+  redirectUri: "https://app.test/callback",
+  scope: "profile",
+  state: "state-a",
+  codeChallenge: "challenge-a",
+  codeChallengeMethod: "S256",
+};
 
-  markAutoConsentAttempted("state-a");
+test("marks auto consent per transaction so a remount cannot issue a second code", () => {
+  assert.equal(hasAttemptedAutoConsent(transaction), false);
 
-  assert.equal(hasAttemptedAutoConsent("state-a"), true);
-  assert.equal(hasAttemptedAutoConsent("state-b"), false);
+  markAutoConsentAttempted(transaction);
+
+  assert.equal(hasAttemptedAutoConsent(transaction), true);
+  assert.equal(hasAttemptedAutoConsent({ ...transaction, state: "state-b" }), false);
+});
+
+test("a reused state with a new client or challenge is a separate transaction", () => {
+  markAutoConsentAttempted(transaction);
+
+  assert.equal(hasAttemptedAutoConsent({ ...transaction, clientId: "client-b" }), false);
+  assert.equal(hasAttemptedAutoConsent({ ...transaction, codeChallenge: "challenge-b" }), false);
+  assert.equal(hasAttemptedAutoConsent({ ...transaction, redirectUri: "https://other.test/callback" }), false);
+  assert.equal(hasAttemptedAutoConsent({ ...transaction, scope: "profile email" }), false);
+});
+
+test("keeps fields apart so a value containing the separator cannot collide", () => {
+  assert.notEqual(
+    getAutoConsentKey({ ...transaction, clientId: "a|b", redirectUri: "c" }),
+    getAutoConsentKey({ ...transaction, clientId: "a", redirectUri: "b|c" })
+  );
 });

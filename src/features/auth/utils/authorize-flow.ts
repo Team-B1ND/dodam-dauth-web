@@ -32,21 +32,50 @@ export function getAuthorizeReturnUrl(pathname: string, search: string) {
 const AUTO_CONSENT_STORAGE_PREFIX = "dauth_auto_consent:";
 const attemptedAutoConsents = new Set<string>();
 
-export function hasAttemptedAutoConsent(state: string) {
-  if (attemptedAutoConsents.has(state)) return true;
+export interface AutoConsentTransaction {
+  clientId: string;
+  redirectUri: string;
+  scope: string;
+  state: string;
+  codeChallenge: string;
+  codeChallengeMethod: string;
+}
+
+// The key covers every parameter that makes an authorization request distinct.
+// `state` alone would leak across transactions: a client that reuses the same
+// state in the same tab with a new client id or PKCE challenge is a different
+// exchange and must still auto-consent. Encoding each part keeps a value that
+// contains the separator from colliding with a neighbouring field.
+export function getAutoConsentKey(transaction: AutoConsentTransaction) {
+  return [
+    transaction.clientId,
+    transaction.redirectUri,
+    transaction.scope,
+    transaction.state,
+    transaction.codeChallenge,
+    transaction.codeChallengeMethod,
+  ]
+    .map(encodeURIComponent)
+    .join("|");
+}
+
+export function hasAttemptedAutoConsent(transaction: AutoConsentTransaction) {
+  const key = getAutoConsentKey(transaction);
+  if (attemptedAutoConsents.has(key)) return true;
 
   try {
-    return sessionStorage.getItem(AUTO_CONSENT_STORAGE_PREFIX + state) !== null;
+    return sessionStorage.getItem(AUTO_CONSENT_STORAGE_PREFIX + key) !== null;
   } catch {
     return false;
   }
 }
 
-export function markAutoConsentAttempted(state: string) {
-  attemptedAutoConsents.add(state);
+export function markAutoConsentAttempted(transaction: AutoConsentTransaction) {
+  const key = getAutoConsentKey(transaction);
+  attemptedAutoConsents.add(key);
 
   try {
-    sessionStorage.setItem(AUTO_CONSENT_STORAGE_PREFIX + state, "1");
+    sessionStorage.setItem(AUTO_CONSENT_STORAGE_PREFIX + key, "1");
   } catch {
     // Storage can be blocked; the module-scoped set still covers remounts.
   }

@@ -114,9 +114,12 @@ export function useAuthorizeFlow() {
       setAuthData(data);
 
       // Marked before the request and never cleared, so a remount, a retry or a
-      // back navigation cannot auto-issue a second code for the same state.
-      if (data.consented && !hasAttemptedAutoConsent(state)) {
-        markAutoConsentAttempted(state);
+      // back navigation cannot auto-issue a second code for this transaction.
+      // The key spans every request parameter, so a later authorization that
+      // reuses the state with a new client or challenge still auto-consents.
+      const transaction = { clientId, redirectUri, scope, state, codeChallenge, codeChallengeMethod };
+      if (data.consented && !hasAttemptedAutoConsent(transaction)) {
+        markAutoConsentAttempted(transaction);
         await handleConsent(true, data);
       }
     } catch (err: unknown) {
