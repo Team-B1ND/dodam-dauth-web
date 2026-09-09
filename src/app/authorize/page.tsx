@@ -6,9 +6,9 @@ import { useAuthorizeFlow } from "@/features/auth/hooks/useAuthorizeFlow";
 import * as S from "./authorize.styles";
 
 function AuthorizeContent() {
-  const { authData, error, loading, submitting, handleConsent, retryAuthorize, redirectToLogin } = useAuthorizeFlow();
+  const { authData, error, loading, submitting, redirecting, handleConsent, retryAuthorize, redirectToLogin } = useAuthorizeFlow();
 
-  if (loading || submitting) {
+  if (loading || redirecting) {
     return <S.CenterPage><S.StatusText>로딩 중...</S.StatusText></S.CenterPage>;
   }
 
