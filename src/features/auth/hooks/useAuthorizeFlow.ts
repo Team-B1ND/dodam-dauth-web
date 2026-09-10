@@ -6,6 +6,7 @@ import { apiClient } from "@/shared/api";
 import { checkLoginStatus, submitConsent } from "@/features/auth/api";
 import type { AuthorizeData } from "@/entities/client/types";
 import {
+  clearAutoConsentAttempt,
   getAuthorizeReturnUrl,
   getErrorMessage,
   hasAttemptedAutoConsent,
@@ -37,12 +38,15 @@ export function useAuthorizeFlow() {
     router.replace("/login?next=__authorize__");
   }, [router]);
 
+  // Resolves to false only when the attempt ended without a redirect, so a
+  // caller that took a guard before calling can release it. Both early returns
+  // mean another attempt already owns the redirect, so the guard must hold.
   const handleConsent = useCallback(
-    async (approved: boolean, data: AuthorizeData) => {
+    async (approved: boolean, data: AuthorizeData): Promise<boolean> => {
       // The lock is a ref, not `submitting`: a state update is invisible to
       // clicks already queued in the same task (double click, touch + click,
       // Enter on a focused button), and one consent must issue one code.
-      if (submitLock.current) return;
+      if (submitLock.current) return true;
       submitLock.current = true;
       setSubmitting(true);
       setError("");
@@ -58,7 +62,7 @@ export function useAuthorizeFlow() {
           approved,
         });
 
-        if (redirectLock.current) return;
+        if (redirectLock.current) return true;
         redirectLock.current = true;
         setRedirecting(true);
         // replace() keeps back navigation out of a consent screen that is done,
@@ -66,15 +70,17 @@ export function useAuthorizeFlow() {
         window.location.replace(redirectUrl);
         // Both locks stay closed on success. Navigation is asynchronous, so
         // unlocking here would re-enable consent while the callback is running.
+        return true;
       } catch (err: unknown) {
         submitLock.current = false;
         setSubmitting(false);
 
         if (isUnauthorized(err)) {
           redirectToLogin();
-          return;
+          return false;
         }
         setError(getErrorMessage(err));
+        return false;
       }
     },
     [scope, redirectToLogin]
@@ -120,7 +126,12 @@ export function useAuthorizeFlow() {
       const transaction = { clientId, redirectUri, scope, state, codeChallenge, codeChallengeMethod };
       if (data.consented && !hasAttemptedAutoConsent(transaction)) {
         markAutoConsentAttempted(transaction);
-        await handleConsent(true, data);
+        // The mark guards the request while it is in flight, but an attempt
+        // that never redirected must give it back: a 401 returns to this exact
+        // URL after login, and a transient failure ends at "다시 시도". Either
+        // way the next load has to auto-consent instead of asking again.
+        const redirected = await handleConsent(true, data);
+        if (!redirected) clearAutoConsentAttempt(transaction);
       }
     } catch (err: unknown) {
       if (isUnauthorized(err)) {

@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import {
+  clearAutoConsentAttempt,
   getAuthorizeReturnUrl,
   getErrorMessage,
   getAutoConsentKey,
@@ -59,4 +60,24 @@ test("keeps fields apart so a value containing the separator cannot collide", ()
     getAutoConsentKey({ ...transaction, clientId: "a|b", redirectUri: "c" }),
     getAutoConsentKey({ ...transaction, clientId: "a", redirectUri: "b|c" })
   );
+});
+
+test("releases the mark when an attempt ends without a redirect", () => {
+  markAutoConsentAttempted(transaction);
+  assert.equal(hasAttemptedAutoConsent(transaction), true);
+
+  clearAutoConsentAttempt(transaction);
+
+  assert.equal(hasAttemptedAutoConsent(transaction), false);
+});
+
+test("releasing one transaction leaves another transaction's mark intact", () => {
+  const other = { ...transaction, clientId: "client-b" };
+  markAutoConsentAttempted(transaction);
+  markAutoConsentAttempted(other);
+
+  clearAutoConsentAttempt(transaction);
+
+  assert.equal(hasAttemptedAutoConsent(transaction), false);
+  assert.equal(hasAttemptedAutoConsent(other), true);
 });

@@ -80,3 +80,17 @@ export function markAutoConsentAttempted(transaction: AutoConsentTransaction) {
     // Storage can be blocked; the module-scoped set still covers remounts.
   }
 }
+
+// Only an attempt that reached a redirect may keep the mark. An attempt that
+// failed left no code behind, so holding the mark would strand a consented user
+// on the consent screen after re-login or a retry of the same authorization.
+export function clearAutoConsentAttempt(transaction: AutoConsentTransaction) {
+  const key = getAutoConsentKey(transaction);
+  attemptedAutoConsents.delete(key);
+
+  try {
+    sessionStorage.removeItem(AUTO_CONSENT_STORAGE_PREFIX + key);
+  } catch {
+    // Storage can be blocked; the module-scoped set is already released.
+  }
+}
