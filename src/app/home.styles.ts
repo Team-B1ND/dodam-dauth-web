@@ -1,4 +1,5 @@
-import { colors, breakpoints, mq } from "@b1nd/dodam-design-system";
+import { colors } from "@b1nd/dodam-design-system/colors";
+import { breakpoints, mq } from "@b1nd/dodam-design-system/breakpoints";
 import styled from "@emotion/styled";
 
 export const Page = styled.div`

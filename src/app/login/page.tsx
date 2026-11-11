@@ -1,7 +1,7 @@
 "use client";
 
 import { Suspense } from "react";
-import { TextField, FilledButton } from "@b1nd/dodam-design-system";
+import { TextField, FilledButton } from "@b1nd/dodam-design-system/components";
 import { useLoginForm } from "@/features/auth/hooks/useLoginForm";
 import * as S from "./login.styles";
 

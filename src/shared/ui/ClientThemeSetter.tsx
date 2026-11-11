@@ -3,7 +3,8 @@
 import { useEffect, useState } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ThemeSetter } from "@b1nd/dodam-design-system/next";
-import { ToastProvider, OverlayProvider, applyTheme, getStoredTheme } from "@b1nd/dodam-design-system";
+import { ToastProvider, OverlayProvider } from "@b1nd/dodam-design-system/components";
+import { applyTheme, getStoredTheme } from "@b1nd/dodam-design-system/themes";
 
 export function ClientProviders({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(() => new QueryClient({

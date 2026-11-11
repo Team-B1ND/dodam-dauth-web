@@ -1,7 +1,9 @@
 "use client";
 
 import { Suspense } from "react";
-import { colors, FilledButton, TextButton, Avatar, BarChart, Gear, useOverlay } from "@b1nd/dodam-design-system";
+import { colors } from "@b1nd/dodam-design-system/colors";
+import { FilledButton, TextButton, Avatar, useOverlay } from "@b1nd/dodam-design-system/components";
+import { BarChart, Gear } from "@b1nd/dodam-design-system/icons";
 import { useProfilePage } from "@/features/client/hooks/useProfilePage";
 import { RegisterServiceModal } from "@/features/client/ui/RegisterServiceModal";
 import { EditInfoModal } from "@/features/client/ui/EditInfoModal";

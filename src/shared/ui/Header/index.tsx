@@ -1,7 +1,8 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { colors, breakpoints, mq } from "@b1nd/dodam-design-system";
+import { colors } from "@b1nd/dodam-design-system/colors";
+import { breakpoints, mq } from "@b1nd/dodam-design-system/breakpoints";
 import styled from "@emotion/styled";
 import { AuthHeaderAction } from "@/features/auth/ui/AuthHeaderAction";
 

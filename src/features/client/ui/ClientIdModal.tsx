@@ -1,9 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { FilledButton, useToast } from "@b1nd/dodam-design-system";
+import { FilledButton, useToast } from "@b1nd/dodam-design-system/components";
 import { ownerResetSecret } from "@/features/client/api";
-import type { OverlayControllerProps } from "@b1nd/dodam-design-system";
+import type { OverlayControllerProps } from "@b1nd/dodam-design-system/components";
 import type { ClientInfo } from "@/entities/client/types";
 import { ModalShell } from "@/shared/ui/Modal";
 import { ModalTitle, ButtonRow } from "@/shared/ui/ModalParts";

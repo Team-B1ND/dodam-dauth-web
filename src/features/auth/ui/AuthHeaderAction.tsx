@@ -1,7 +1,8 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { colors, FilledButton, Avatar } from "@b1nd/dodam-design-system";
+import { colors } from "@b1nd/dodam-design-system/colors";
+import { FilledButton, Avatar } from "@b1nd/dodam-design-system/components";
 import styled from "@emotion/styled";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { useMyProfile } from "@/features/user/hooks/useMyProfile";

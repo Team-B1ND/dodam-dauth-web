@@ -1,6 +1,6 @@
 import { useCallback, useEffect } from "react";
 import { useAnimationControls } from "framer-motion";
-import type { OverlayControllerProps } from "@b1nd/dodam-design-system";
+import type { OverlayControllerProps } from "@b1nd/dodam-design-system/components";
 
 const WIGGLE = { x: [0, 4, -4, 3, -3, 0], transition: { duration: 0.25, ease: "easeInOut" as const } };
 

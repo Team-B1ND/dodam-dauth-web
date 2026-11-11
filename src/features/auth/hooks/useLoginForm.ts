@@ -2,7 +2,7 @@
 
 import { useState, FormEvent, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useToast } from "@b1nd/dodam-design-system";
+import { useToast } from "@b1nd/dodam-design-system/components";
 import { login } from "@/features/auth/api";
 import axios from "axios";
 

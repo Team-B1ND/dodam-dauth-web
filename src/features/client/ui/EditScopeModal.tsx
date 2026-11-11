@@ -1,9 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { FilledButton, FilledTextField, useToast } from "@b1nd/dodam-design-system";
+import { FilledButton, FilledTextField, useToast } from "@b1nd/dodam-design-system/components";
 import { updateClient } from "@/features/client/api";
-import type { OverlayControllerProps } from "@b1nd/dodam-design-system";
+import type { OverlayControllerProps } from "@b1nd/dodam-design-system/components";
 import type { ClientInfo } from "@/entities/client/types";
 import { useQueryClient } from "@tanstack/react-query";
 import { ModalShell } from "@/shared/ui/Modal";

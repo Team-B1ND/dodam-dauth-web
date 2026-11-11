@@ -1,4 +1,4 @@
-import { colors } from "@b1nd/dodam-design-system";
+import { colors } from "@b1nd/dodam-design-system/colors";
 import styled from "@emotion/styled";
 
 export const PageWrapper = styled.div`
