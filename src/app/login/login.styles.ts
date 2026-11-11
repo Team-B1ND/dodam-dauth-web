@@ -8,6 +8,11 @@ export const PageWrapper = styled.div`
   justify-content: center;
   padding: 16px;
   background: ${colors.background.default};
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    gap: 24px;
+  }
 `;
 
 export const Card = styled.div`
@@ -119,6 +124,10 @@ export const BottomText = styled.p`
   font-weight: 500;
   letter-spacing: 0.28px;
   color: ${colors.text.placeholder};
+
+  @media (max-width: 768px) {
+    position: static;
+  }
 `;
 
 export const BottomLink = styled.span`
