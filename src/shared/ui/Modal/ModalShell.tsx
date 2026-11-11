@@ -1,10 +1,12 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { colors, mq, shapes } from "@b1nd/dodam-design-system";
+import { colors } from "@b1nd/dodam-design-system/colors";
+import { mq } from "@b1nd/dodam-design-system/breakpoints";
+import { shapes } from "@b1nd/dodam-design-system/shapes";
 import styled from "@emotion/styled";
 import { motion, AnimatePresence } from "framer-motion";
-import type { OverlayControllerProps } from "@b1nd/dodam-design-system";
+import type { OverlayControllerProps } from "@b1nd/dodam-design-system/components";
 import { useModalAnimation, MODAL_INITIAL, MODAL_EXIT, MODAL_TRANSITION } from "./useModalAnimation";
 
 interface ModalShellProps extends OverlayControllerProps {

@@ -1,6 +1,7 @@
 "use client";
 
-import { colors, useToast } from "@b1nd/dodam-design-system";
+import { colors } from "@b1nd/dodam-design-system/colors";
+import { useToast } from "@b1nd/dodam-design-system/components";
 import styled from "@emotion/styled";
 
 interface CopyableFieldProps {

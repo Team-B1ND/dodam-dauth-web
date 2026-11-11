@@ -1,10 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { colors, FilledButton, FilledTextField, useToast } from "@b1nd/dodam-design-system";
+import { colors } from "@b1nd/dodam-design-system/colors";
+import { FilledButton, FilledTextField, useToast } from "@b1nd/dodam-design-system/components";
 import styled from "@emotion/styled";
 import { deactivateClient } from "@/features/client/api";
-import type { OverlayControllerProps } from "@b1nd/dodam-design-system";
+import type { OverlayControllerProps } from "@b1nd/dodam-design-system/components";
 import type { ClientInfo } from "@/entities/client/types";
 import { useQueryClient } from "@tanstack/react-query";
 import { ModalShell } from "@/shared/ui/Modal";

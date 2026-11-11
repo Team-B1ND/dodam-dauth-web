@@ -1,7 +1,8 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { FilledButton, TextButton, BarChart, useOverlay } from "@b1nd/dodam-design-system";
+import { FilledButton, TextButton, useOverlay } from "@b1nd/dodam-design-system/components";
+import { BarChart } from "@b1nd/dodam-design-system/icons";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { useMyApps } from "@/features/client/hooks/useMyApps";
 import { RegisterServiceModal } from "@/features/client/ui/RegisterServiceModal";

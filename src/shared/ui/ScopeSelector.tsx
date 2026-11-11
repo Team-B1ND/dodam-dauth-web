@@ -1,6 +1,8 @@
 "use client";
 
-import { colors, Checkbox, mq } from "@b1nd/dodam-design-system";
+import { colors } from "@b1nd/dodam-design-system/colors";
+import { Checkbox } from "@b1nd/dodam-design-system/components";
+import { mq } from "@b1nd/dodam-design-system/breakpoints";
 import styled from "@emotion/styled";
 import { useScopes } from "@/features/scope/hooks/useScopes";
 

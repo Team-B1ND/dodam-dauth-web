@@ -1,6 +1,6 @@
 "use client";
 
-import { colors } from "@b1nd/dodam-design-system";
+import { colors } from "@b1nd/dodam-design-system/colors";
 import styled from "@emotion/styled";
 
 export const ModalTitle = styled.h2`

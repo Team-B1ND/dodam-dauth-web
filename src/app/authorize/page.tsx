@@ -1,7 +1,7 @@
 "use client";
 
 import { Suspense } from "react";
-import { FilledButton } from "@b1nd/dodam-design-system";
+import { FilledButton } from "@b1nd/dodam-design-system/components";
 import { useAuthorizeFlow } from "@/features/auth/hooks/useAuthorizeFlow";
 import * as S from "./authorize.styles";
 
